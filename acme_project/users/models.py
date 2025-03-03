@@ -4,5 +4,6 @@ from django.db import models
 
 # Create your models here.
 class CustomUser(AbstractUser):
+    pass
     birthday = models.DateField(null=True, blank=True)
     bio = models.TextField(null=True, blank=True)

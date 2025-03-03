@@ -1,4 +1,7 @@
 """Представления для приложения birthday."""
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import HttpResponse
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
@@ -44,7 +47,18 @@ class BirthdayDetailView(DetailView):
         return context
 
 
-class BirthdayCreateView(CreateView):
+class OnlyAuthorMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        # Получаем текущий объект
+        object = self.get_object()
+        # Метод вернёт True, если текущий пользователь является автором объекта.
+        # Если пользователь - автор объекта, то тест будет пройден.
+        # Если нет, то будет вызывана ошибка 403.
+        return object.author == self.request.user
+
+
+class BirthdayCreateView(LoginRequiredMixin, CreateView):
     model = Birthday
     form_class = BirthdayForm
     # model = Birthday
@@ -58,20 +72,31 @@ class BirthdayCreateView(CreateView):
     # Указываем namespace:name страницы, куда будет перенаправлен пользователь
     # после создания объекта:
     # success_url = reverse_lazy('birthday:list')
+    def form_valid(self, form):
+        # Присвоить полю author объект пользователя из запроса.
+        form.instance.author = self.request.user
+        # Продолжить валидацию, описанную в форме.
+        return super().form_valid(form)
 
 
-class BirthdayDeleteView(DeleteView):
+class BirthdayDeleteView(OnlyAuthorMixin, DeleteView):
     model = Birthday
     # template_name = 'birthday/birthday_form.html'
     success_url = reverse_lazy('birthday:list')
 
 
-class BirthdayUpdateView(UpdateView):
+class BirthdayUpdateView(OnlyAuthorMixin, UpdateView):
     model = Birthday
     form_class = BirthdayForm
     # form_class = BirthdayForm
     # template_name = 'birthday/birthday_form.html'
     # success_url = reverse_lazy('birthday:list')
+
+
+
+@login_required
+def simple_view(request):
+    return HttpResponse('Страница для залогиненных пользователей!')
 
 
 # def birthday(request, pk=None):
