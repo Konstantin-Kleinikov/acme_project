@@ -11,6 +11,7 @@ urlpatterns = [
     # path('list/', views.birthday_list, name='list'),
     path('list/', views.BirthdayListView.as_view(), name='list'),
     path('<int:pk>/', views.BirthdayDetailView.as_view(), name='detail'),
+    path('<int:pk>/comment/', views.CongratulationCreateView.as_view(), name='add_comment'),
     path('<int:pk>/edit/', views.BirthdayUpdateView.as_view(), name='edit'),
     path(
         '<int:pk>/delete/',

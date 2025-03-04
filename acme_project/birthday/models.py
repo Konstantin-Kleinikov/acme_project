@@ -5,7 +5,6 @@ from django.urls import reverse
 
 from birthday.validators import real_age
 
-
 User = get_user_model()
 
 
@@ -29,7 +28,7 @@ class Birthday(models.Model):
         blank=True
     )
     author = models.ForeignKey(
-        #settings.AUTH_USER_MODEL,
+        # settings.AUTH_USER_MODEL,
         User,
         verbose_name='Автор записи',
         on_delete=models.CASCADE,
@@ -49,5 +48,24 @@ class Birthday(models.Model):
         return f'{self.first_name} - {self.last_name}'
 
     def get_absolute_url(self):
-        # С помощью функции reverse() возвращаем URL объекта.
+        """С помощью функции reverse() возвращаем URL объекта."""
         return reverse('birthday:detail', kwargs={'pk': self.pk})
+
+
+class Congratulation(models.Model):
+    """Класс модели для поздравлений."""
+
+    text = models.TextField('Текст поздравления')
+    birthday = models.ForeignKey(
+        Birthday,
+        on_delete=models.CASCADE,
+        related_name='congratulations',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        ordering = ('-created_at',)
